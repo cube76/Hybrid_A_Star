@@ -63,7 +63,11 @@ git clone https://github.com/zm0612/Hybrid_A_Star.git
 # Build
 cd hybrid_a_star_ws
 catkin_make
+
+source devel/setup.bash
+roslaunch hybrid_a_star run_hybrid_a_star.launch
 ```
+
 
 # Hybrid A* Path Planner (Standalone Python Wrapper)
 
@@ -106,12 +110,9 @@ cd build
 cmake ..
 make -j4
 
-## 4. Run Hybrid A Star
-
-```shell
-source devel/setup.bash
-roslaunch hybrid_a_star run_hybrid_a_star.launch
 ```
+
+## 4. Run Hybrid A Star
 
 **The starting point is selected by the `2D Pose Estimate` in rviz, and the end point is selected by the `2D Nav Goal`.**
 
