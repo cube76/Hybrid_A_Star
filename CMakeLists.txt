@@ -1,71 +1,53 @@
 cmake_minimum_required(VERSION 3.10)
 project(hybrid_a_star)
 
-message(STATUS "Hybrid A star")
-message(STATUS "Author: Zhang Zhimeng")
+message(STATUS "Hybrid A star - Standalone Python Version")
 
-#set(CMAKE_VERBOSE_MAKEFILE "true")
+# ==========================================
+# STRICTLY ENFORCE C++14 GLOBALLY
+# ==========================================
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Compiler
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+# Performance Optimizations
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -march=native")
 
-if (COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif (COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else ()
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_FLAGS} doesn't have C++11 support.
-                         Please use a different C++ compiler")
-endif ()
-
-set(ADDITIONAL_CXX_FLAG "-Wall -O3 -march=native")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ADDITIONAL_CXX_FLAG}")
-
-# Eigen
+# Find Eigen (Required for matrix math)
 include(cmake/FindEigen.cmake)
 include_directories(${EIGEN_INCLUDE_DIR})
 
-# glog
-include(cmake/glog.cmake)
-include_directories(${GLOG_INCLUDE_DIRS})
+# Find glog (Modern CMake method for Homebrew)
+find_package(glog REQUIRED)
 
-# catkin
-find_package(
-    catkin REQUIRED COMPONENTS
-    nav_msgs
-    roscpp
-    tf
-)
+# Include the header files directory
+include_directories(include)
 
-include_directories(
-    include
-    ${catkin_INCLUDE_DIRS}
-)
-
-catkin_package(
-    #  INCLUDE_DIRS include
-    #  LIBRARIES path_searcher
-    #  CATKIN_DEPENDS nav_mags roscpp tf
-    #  DEPENDS system_lib
-)
-
+# ==========================================
+# 1. Build the Core Algorithm
+# ==========================================
 add_library(
     PATH_SEARCHER_LIB SHARED
     src/rs_path.cpp
-    src/costmap_subscriber.cpp
-    src/goal_pose_subscriber.cpp
-    src/init_pose_subscriber.cpp
     src/hybrid_a_star.cpp
-    src/hybrid_a_star_flow.cpp
 )
 
+# Link against the modern glog target
 target_link_libraries(
     PATH_SEARCHER_LIB
-    ${catkin_LIBRARIES}
-    ${GLOG_LIBRARIES}
+    glog::glog
 )
 
-add_executable(run_hybrid_astar app/run_hybrid_astar.cpp)
-target_link_libraries(run_hybrid_astar PATH_SEARCHER_LIB)
+# ==========================================
+# 2. Python Wrapper (pybind11)
+# ==========================================
+find_package(pybind11 REQUIRED)
+
+# Create the Python module
+pybind11_add_module(hybrid_a_star_py src/pybind_wrapper.cpp)
+
+# Link the module against the core library and glog
+target_link_libraries(hybrid_a_star_py PRIVATE 
+    PATH_SEARCHER_LIB 
+    glog::glog
+)
