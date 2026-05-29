@@ -25,8 +25,24 @@ PYBIND11_MODULE(hybrid_a_star_py, m) {
              py::arg("state_grid_resolution"), py::arg("map_grid_resolution") = 0.1)
         .def("Search", &HybridAStar::Search, 
              py::arg("start_state"), py::arg("goal_state"))
-        .def("GetSearchedTree", &HybridAStar::GetSearchedTree)
-        .def("GetPath", &HybridAStar::GetPath)
+        .def("GetSearchedTree", [](HybridAStar& self) {
+            auto eigen_tree = self.GetSearchedTree();
+            std::vector<std::vector<double>> result;
+            result.reserve(eigen_tree.size());
+            for (const auto& vec : eigen_tree) {
+                result.push_back({vec[0], vec[1], vec[2], vec[3]});
+            }
+            return result;
+        })
+        .def("GetPath", [](HybridAStar& self) {
+            auto eigen_path = self.GetPath();
+            std::vector<std::vector<double>> result;
+            result.reserve(eigen_path.size());
+            for (const auto& vec : eigen_path) {
+                result.push_back({vec[0], vec[1], vec[2]});
+            }
+            return result;
+        })
         .def("GetVisitedNodesNumber", &HybridAStar::GetVisitedNodesNumber)
         .def("GetPathLength", &HybridAStar::GetPathLength)
         

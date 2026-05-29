@@ -542,12 +542,6 @@ bool HybridAStar::Search(const Vec3d &start_state, const Vec3d &goal_state) {
                 }
                 path_length_ = path_length_ - segment_length_ + rs_length;
 
-                std::cout << "ComputeH use time(ms): " << compute_h_time << std::endl;
-                std::cout << "check collision use time(ms): " << check_collision_use_time << std::endl;
-                std::cout << "GetNeighborNodes use time(ms): " << neighbor_time << std::endl;
-                std::cout << "average time of check collision(ms): "
-                          << check_collision_use_time / num_check_collision
-                          << std::endl;
                 printf("\033[1;32m --> Time in Hybrid A star is %f ms, path length: %f  \033[0m\n",
                          search_used_time.End(), path_length_);
 
@@ -615,13 +609,17 @@ bool HybridAStar::Search(const Vec3d &start_state, const Vec3d &goal_state) {
 
 VectorVec4d HybridAStar::GetSearchedTree() {
     VectorVec4d tree;
-    Vec4d point_pair;
+    alignas(32) Vec4d point_pair;
 
     visited_node_number_ = 0;
     for (int i = 0; i < STATE_GRID_SIZE_X_; ++i) {
         for (int j = 0; j < STATE_GRID_SIZE_Y_; ++j) {
             for (int k = 0; k < STATE_GRID_SIZE_PHI_; ++k) {
                 if (state_node_map_[i][j][k] == nullptr || state_node_map_[i][j][k]->parent_node_ == nullptr) {
+                    continue;
+                }
+
+                if (state_node_map_[i][j][k]->intermediate_states_.empty()) {
                     continue;
                 }
 
