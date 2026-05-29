@@ -65,6 +65,47 @@ cd hybrid_a_star_ws
 catkin_make
 ```
 
+# Hybrid A* Path Planner (Standalone Python Wrapper)
+
+A high-performance, standalone C++ implementation of the Hybrid A* algorithm with a native Python interface via Pybind11. 
+
+This repository has been decoupled from the Robot Operating System (ROS) to provide a lightweight, high-speed backend for spatial layout optimization and heavy truck maneuver simulations in Python. It heavily leverages C++14 optimizations and strictly maps vehicle dimensions using `fb` (front-back) and `lr` (left-right) parameters.
+
+## 📋 Prerequisites
+
+To compile the C++ source code into a Python library (`.so` file), you will need:
+* **CMake** (v3.10+)
+* **C++14** compatible compiler (GCC or Clang)
+* **Python 3.x**
+* **Pybind11** (Python-C++ binding framework)
+* **Google glog** (Logging library)
+* **Eigen3** (Linear algebra library)
+
+---
+
+## 🍏 Building on macOS
+
+macOS relies on **Homebrew** for dependency management.
+
+### 1. Install Dependencies
+Open your terminal and install the required libraries:
+```bash
+brew update
+brew install cmake pybind11 glog eigen
+sudo apt-get install -y build-essential cmake python3-dev python3-pybind11 libgoogle-glog-dev
+sudo apt-get install -y python3.12-dev
+
+# 1. Clean up any old build caches
+rm -rf build
+
+# 2. Create a fresh build directory
+mkdir build
+cd build
+
+# 3. Configure and compile (using 4 CPU cores)
+cmake ..
+make -j4
+
 ## 4. Run Hybrid A Star
 
 ```shell
